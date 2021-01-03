@@ -24,6 +24,12 @@ public class InputManager : MonoBehaviour
     public UnityEvent OnEUp = new UnityEvent();
     public UnityEvent OnEHold = new UnityEvent();
 
+    [Header("R")]
+    public KeyCode KeyboardButtonR;
+    public UnityEvent OnRDown = new UnityEvent();
+    public UnityEvent OnRUp = new UnityEvent();
+    public UnityEvent OnRHold = new UnityEvent();
+
     void Update()
     {
         //--------Q button------
@@ -64,6 +70,19 @@ public class InputManager : MonoBehaviour
         if (Input.GetKey(KeyboardButtonE))
         {
             OnEHold.Invoke();
+        }
+        //--------R button------
+        if (Input.GetKeyDown(KeyboardButtonR))
+        {
+            OnRDown.Invoke();
+        }
+        if (Input.GetKeyUp(KeyboardButtonR))
+        {
+            OnRUp.Invoke();
+        }
+        if (Input.GetKey(KeyboardButtonR))
+        {
+            OnRHold.Invoke();
         }
     }
 }

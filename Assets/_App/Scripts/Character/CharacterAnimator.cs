@@ -28,9 +28,30 @@ public class CharacterAnimator : MonoBehaviour
 
     void Awake()
     {
-        animator = GetComponentInChildren<Animator>();
+        animator = ResolveBodyAnimator();
         speedHash = Animator.StringToHash(speedParameter);
         lastPosition = transform.position;
+    }
+
+    // The first-person Arms model carries its own (controller-less) Animator and
+    // lives under the Camera, so a plain GetComponentInChildren<Animator>() would
+    // grab it instead of the body model. Pick the model that actually drives
+    // locomotion: the one with an AnimatorController assigned.
+    Animator ResolveBodyAnimator()
+    {
+        Animator fallback = null;
+        foreach (Animator candidate in GetComponentsInChildren<Animator>(true))
+        {
+            if (candidate.runtimeAnimatorController != null)
+            {
+                return candidate;
+            }
+            if (fallback == null)
+            {
+                fallback = candidate;
+            }
+        }
+        return fallback;
     }
 
     void Update()

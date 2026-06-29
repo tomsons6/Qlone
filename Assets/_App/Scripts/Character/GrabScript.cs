@@ -49,6 +49,17 @@ public class GrabScript : MonoBehaviour
     bool m_HeldWasKinematic;
     bool m_HeldIsRagdoll;
     bool m_HandOccupied;
+    Vector3 m_GrabLocalPoint;
+
+    /// <summary>True while an object/ragdoll is being held. Read by <see cref="GrabIK"/>
+    /// to know when to reach the hand out and curl the fingers into a grip.</summary>
+    public bool HandOccupied => m_HandOccupied;
+
+    /// <summary>World position of the spot on the held body where it was grabbed, so
+    /// <see cref="GrabIK"/> can reach the hand to the object itself (and follow it as it
+    /// is pulled in) rather than to a fixed anchor. Only meaningful while held.</summary>
+    public Vector3 GrabWorldPosition =>
+        m_HeldBody != null ? m_HeldBody.transform.TransformPoint(m_GrabLocalPoint) : transform.position;
 
     public void PickUpObject()
     {
@@ -86,6 +97,9 @@ public class GrabScript : MonoBehaviour
         m_HeldUsedGravity = body.useGravity;
         m_HeldWasKinematic = body.isKinematic;
         m_HeldIsRagdoll = isRagdoll;
+        // Remember where on the body we grabbed it (in the body's local space) so the
+        // hand can be driven to that exact spot as the body moves.
+        m_GrabLocalPoint = body.transform.InverseTransformPoint(hit.point);
 
         if (isRagdoll)
         {

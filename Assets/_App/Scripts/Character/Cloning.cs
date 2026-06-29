@@ -194,7 +194,7 @@ public class Cloning : MonoBehaviour
             smr.updateWhenOffscreen = true;
         }
 
-        Animator animator = clone.GetComponentInChildren<Animator>();
+        Animator animator = FindHumanoidAnimator(clone);
         bool ragdolled = HumanoidRagdoll.Create(animator, velocity);
         if (!ragdolled)
         {
@@ -297,6 +297,27 @@ public class Cloning : MonoBehaviour
         {
             cam.rect = to;
         }
+    }
+
+    // The first-person Arms model carries its own (non-humanoid) Animator under the
+    // Camera, so a plain GetComponentInChildren<Animator>() can return it instead of
+    // the body. The ragdoll builder needs the humanoid rig, so pick that one;
+    // otherwise it fails and the clone gets destroyed instead of dropping limp.
+    static Animator FindHumanoidAnimator(GameObject root)
+    {
+        Animator fallback = null;
+        foreach (Animator candidate in root.GetComponentsInChildren<Animator>(true))
+        {
+            if (candidate.isHuman)
+            {
+                return candidate;
+            }
+            if (fallback == null)
+            {
+                fallback = candidate;
+            }
+        }
+        return fallback;
     }
 
     IEnumerator DestroyAfter(GameObject target, float delay)

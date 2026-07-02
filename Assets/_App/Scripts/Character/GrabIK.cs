@@ -54,6 +54,12 @@ public class GrabIK : MonoBehaviour
 
     Camera m_Cam;
     GrabScript m_HoldSource; // the GrabScript that actually grabs (player root, tag "Main")
+
+    /// <summary>
+    /// Current grip blend (0 = relaxed, 1 = fully gripping). <see cref="ViewmodelArms"/>
+    /// reads this to fade the retargeted right-arm swing out while the grip pose is active.
+    /// </summary>
+    public float GripWeight => m_Weight;
     bool m_Resolved;
     bool m_Posed;            // are we currently overriding the bones?
     float m_Weight;
@@ -215,7 +221,7 @@ public class GrabIK : MonoBehaviour
         }
         if (m_Hand == null && m_ForeArm != null)
         {
-            m_Hand = FindDeep(m_ForeArm, "hand.R");
+            m_Hand = FindDeep(m_ForeArm, "palm.01.R");
         }
         if (m_UpperArm == null || m_ForeArm == null || m_Hand == null)
         {

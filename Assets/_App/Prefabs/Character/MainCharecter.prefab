@@ -24,13 +24,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1082451269037145543}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.13, z: 0.62}
+  m_LocalRotation: {x: 0, y: -1, z: 0, w: 0}
+  m_LocalPosition: {x: 0.133, y: -0.448, z: 1.081}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1621053681383949652}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!1 &1621053681383949653
 GameObject:
   m_ObjectHideFlags: 0
@@ -275,6 +275,7 @@ GameObject:
   - component: {fileID: 3318155820991206887}
   - component: {fileID: 8885890575190647874}
   - component: {fileID: 187343416492905513}
+  - component: {fileID: 2791549596781681036}
   m_Layer: 10
   m_Name: MainCharecter
   m_TagString: Main
@@ -590,6 +591,28 @@ MonoBehaviour:
   m_ThumbCurlAxis: {x: 0, y: 0, z: -1}
   m_DebugOverrideWeight: 0
   m_DebugWeight: 1
+--- !u!114 &2791549596781681036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1621053682611726409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5682274e38ac4f34084a8d9e61321cd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Retarget: 1
+  m_SwingScale: 0.7
+  m_Sway: 1
+  m_BreathAmplitude: 0.004
+  m_BreathSpeed: 1.4
+  m_BobAmplitude: 0.02
+  m_BobSpeed: 9
+  m_BobFullSpeed: 3
+  m_LookSwayAngle: 3
+  m_LookSwaySmooth: 10
 --- !u!1 &4897890778811267941
 GameObject:
   m_ObjectHideFlags: 0
@@ -1543,7 +1566,8 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 5866666021909216657, guid: 7ba2d7360b492144aaac1e5a40d29d16, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

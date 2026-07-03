@@ -2990,6 +2990,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1621053682611726408, guid: 443a031e90ca4014fa4eabe79977934c,
+        type: 3}
+      propertyPath: m_Material
+      value: 
+      objectReference: {fileID: 1900346523}
     - target: {fileID: 1621053682611726409, guid: 443a031e90ca4014fa4eabe79977934c,
         type: 3}
       propertyPath: m_Name
@@ -10953,6 +10958,19 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!134 &1900346523
+PhysicsMaterial:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ' (Instance)'
+  serializedVersion: 2
+  m_DynamicFriction: 0.6
+  m_StaticFriction: 0.6
+  m_Bounciness: 0
+  m_FrictionCombine: 0
+  m_BounceCombine: 0
 --- !u!1001 &1911849760
 PrefabInstance:
   m_ObjectHideFlags: 0

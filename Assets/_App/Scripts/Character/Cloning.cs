@@ -110,6 +110,23 @@ public class Cloning : MonoBehaviour
         Camera playerCam = gameObject.GetComponentInChildren<Camera>();
         Camera cloneCam = clone.GetComponentInChildren<Camera>();
 
+        // A fresh clone spawns with the player still in control (CloneActive = false), so its
+        // camera must NOT also be the active MainCamera. It inherits the MainCamera tag from
+        // the base prefab, which would leave two cameras tagged MainCamera -- then every
+        // "is my view active?" check (ViewmodelArms look-sway, Camera.main) fires on both
+        // bodies at once, so the idle clone's arms sway with the player's mouse. Give the
+        // clone a passive view (SwitchClone promotes it later) and silence its duplicate
+        // AudioListener.
+        if (cloneCam != null)
+        {
+            cloneCam.tag = "Untagged";
+            AudioListener cloneListener = cloneCam.GetComponent<AudioListener>();
+            if (cloneListener != null)
+            {
+                cloneListener.enabled = false;
+            }
+        }
+
         AnimateCameraRect(ref playerCamRoutine, playerCam, fullScreenRect, leftSplitRect);
 
         // Start the clone's view just off the right edge, then slide it in.
@@ -206,21 +223,36 @@ public class Cloning : MonoBehaviour
         // Mark the corpse so the grab system treats its body parts as grabbable.
         clone.AddComponent<Ragdoll>();
 
-        // Stop the corpse rendering its (now off-screen) view once the split finishes.
+        // Move the corpse onto the DeadClone layer so every split-screen view renders it.
+        // Live bodies sit on CloneBody (each active view culls the other live body), but a
+        // corpse must stay visible to whichever clone is in control, so it gets its own
+        // always-rendered layer. Relayer the humanoid model subtree (skinned mesh + the
+        // ragdoll colliders that were just added to its bones).
+        int deadLayer = LayerMask.NameToLayer("DeadClone");
+        if (deadLayer >= 0)
+        {
+            SetLayerRecursively(animator.gameObject, deadLayer);
+        }
+        else
+        {
+            Debug.LogWarning("Cloning: 'DeadClone' layer is not defined; leaving the corpse on its current layer.");
+        }
+
+        // Tear down the corpse's first-person view (camera + arms) once the split finishes.
         StartCoroutine(DisableCloneViewAfter(cloneCam, transitionDuration));
     }
 
+    // Once the split has finished closing, remove the dead clone's camera entirely rather
+    // than just disabling it. The first-person Arms and CameraViewArms meshes (and the
+    // HoldPoint anchor) are children of this camera, so a disabled Camera component would
+    // still leave them rendering in mid-air where the corpse's camera was. Destroying the
+    // GameObject takes the arms, anchor and AudioListener with it.
     IEnumerator DisableCloneViewAfter(Camera cam, float delay)
     {
         yield return new WaitForSeconds(delay);
         if (cam != null)
         {
-            cam.enabled = false;
-            AudioListener listener = cam.GetComponent<AudioListener>();
-            if (listener != null)
-            {
-                listener.enabled = false;
-            }
+            Destroy(cam.gameObject);
         }
     }
     public void SwitchClone()
@@ -326,6 +358,16 @@ public class Cloning : MonoBehaviour
         if (target != null)
         {
             Destroy(target);
+        }
+    }
+
+    // Sets a GameObject and its entire child hierarchy onto the given layer.
+    static void SetLayerRecursively(GameObject go, int layer)
+    {
+        go.layer = layer;
+        foreach (Transform child in go.transform)
+        {
+            SetLayerRecursively(child.gameObject, layer);
         }
     }
 }

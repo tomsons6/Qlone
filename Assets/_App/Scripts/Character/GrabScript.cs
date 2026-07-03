@@ -44,12 +44,15 @@ public class GrabScript : MonoBehaviour
     int playerLayer = 10;
 
     Rigidbody m_HeldBody;
+    Collider m_HeldCollider;
     int m_HeldLayer;
     bool m_HeldUsedGravity;
     bool m_HeldWasKinematic;
     bool m_HeldIsRagdoll;
     bool m_HandOccupied;
     Vector3 m_GrabLocalPoint;
+    Quaternion m_GrabRotOffset; // held ragdoll bone's rotation relative to the hold anchor at grab time
+    Transform m_HoldCam;        // camera the object was grabbed with; the item stays with this body across control switches
 
     /// <summary>True while an object/ragdoll is being held. Read by <see cref="GrabIK"/>
     /// to know when to reach the hand out and curl the fingers into a grip.</summary>
@@ -60,6 +63,17 @@ public class GrabScript : MonoBehaviour
     /// is pulled in) rather than to a fixed anchor. Only meaningful while held.</summary>
     public Vector3 GrabWorldPosition =>
         m_HeldBody != null ? m_HeldBody.transform.TransformPoint(m_GrabLocalPoint) : transform.position;
+
+    /// <summary>The collider of the held object that the grab ray hit, so <see cref="GrabIK"/>
+    /// can curl each finger until it touches this surface and stop — the hand conforms to the
+    /// object instead of curling by a fixed angle. Null when nothing is held.</summary>
+    public Collider HeldCollider => m_HeldCollider;
+
+    /// <summary>Transform of the camera the held object was grabbed with. <see cref="GrabIK"/>
+    /// compares it to a body's own camera to tell which body is the holder, so the grip pose
+    /// (and the item itself) stays with the grabber across control switches. Null when nothing
+    /// is held.</summary>
+    public Transform HoldCam => m_HoldCam;
 
     public void PickUpObject()
     {
@@ -93,6 +107,7 @@ public class GrabScript : MonoBehaviour
         }
 
         m_HeldBody = body;
+        m_HeldCollider = hit.collider;
         m_HeldLayer = body.gameObject.layer;
         m_HeldUsedGravity = body.useGravity;
         m_HeldWasKinematic = body.isKinematic;
@@ -100,12 +115,22 @@ public class GrabScript : MonoBehaviour
         // Remember where on the body we grabbed it (in the body's local space) so the
         // hand can be driven to that exact spot as the body moves.
         m_GrabLocalPoint = body.transform.InverseTransformPoint(hit.point);
+        // Bind the hold to the body that grabbed it (the active camera). We keep dragging to
+        // this camera's HoldPoint even after control switches, so the item stays with its
+        // grabber instead of jumping to the newly controlled body.
+        m_HoldCam = cam.transform;
 
         if (isRagdoll)
         {
             // Pin the grabbed bone to the hand; the rest of the body dangles from
-            // it through the ragdoll joints instead of being yanked around.
+            // it through the ragdoll joints instead of being yanked around. Capture the
+            // bone's rotation relative to the hold anchor so it stays fixed in the hand
+            // and turns with the player, rather than keeping a fixed world orientation
+            // (which reads as orbiting a stationary corpse when you turn).
             body.isKinematic = true;
+            Transform grabAnchor = cam.transform.Find(HoldPointName);
+            Quaternion anchorRot = grabAnchor != null ? grabAnchor.rotation : cam.transform.rotation;
+            m_GrabRotOffset = Quaternion.Inverse(anchorRot) * body.rotation;
         }
         else
         {
@@ -133,6 +158,8 @@ public class GrabScript : MonoBehaviour
             m_HeldBody.useGravity = m_HeldUsedGravity;
         }
         m_HeldBody = null;
+        m_HeldCollider = null;
+        m_HoldCam = null;
         m_HandOccupied = false;
     }
 
@@ -148,23 +175,32 @@ public class GrabScript : MonoBehaviour
             return;
         }
 
-        Camera cam = Camera.main;
-        if (cam == null)
+        // Hold against the camera the object was grabbed with (captured in PickUpObject), not
+        // the current Camera.main. Switching control changes Camera.main, but a held item must
+        // stay with the body that grabbed it instead of jumping to whoever is now in control.
+        // If that camera is gone (e.g. the holder was destroyed), drop the item.
+        Transform camT = m_HoldCam;
+        if (camT == null)
         {
+            ReleaseObject();
             return;
         }
 
         // Hold at the hand anchor when present; otherwise just in front of the camera.
-        Transform anchor = cam.transform.Find(HoldPointName);
+        Transform anchor = camT.Find(HoldPointName);
         Vector3 targetPos = anchor != null
             ? anchor.position
-            : cam.transform.position + cam.transform.forward * holdDistance;
+            : camT.position + camT.forward * holdDistance;
 
         if (m_HeldIsRagdoll)
         {
-            // The grabbed bone is kinematic: move it straight to the hand and let
-            // the rest of the body hang from it. No spin, just dangle.
+            // The grabbed bone is kinematic: pin it to the hand in both position and
+            // rotation so the corpse turns with the player (the grabbed side keeps facing
+            // you) instead of holding a fixed world orientation, which read as orbiting a
+            // stationary body. The rest of the body dangles from it through the joints.
+            Quaternion anchorRot = anchor != null ? anchor.rotation : camT.rotation;
             m_HeldBody.MovePosition(targetPos);
+            m_HeldBody.MoveRotation(anchorRot * m_GrabRotOffset);
             return;
         }
 
@@ -174,7 +210,7 @@ public class GrabScript : MonoBehaviour
         // Rigid pickups turn to the grip orientation.
         if (matchRotation)
         {
-            Quaternion targetRot = anchor != null ? anchor.rotation : cam.transform.rotation;
+            Quaternion targetRot = anchor != null ? anchor.rotation : camT.rotation;
             Quaternion delta = targetRot * Quaternion.Inverse(m_HeldBody.rotation);
             delta.ToAngleAxis(out float angle, out Vector3 axis);
             if (angle > 180f)

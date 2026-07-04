@@ -107,6 +107,17 @@ public class Cloning : MonoBehaviour
         GameObject clone = Instantiate(CloneGO, position, rotation);
         CloneActive = false;
 
+        // The player's InputManager is the single input entry point: it drives whichever
+        // body is active (via Camera.main and the sole tag-"Main" GrabScript). The fresh
+        // clone inherits its own enabled InputManager whose grab (E) binding still points at
+        // the clone's own GrabScript, so leaving it on would fire a second, competing grab
+        // on every key press. Silence it so only the player's InputManager processes input.
+        InputManager cloneInput = clone.GetComponent<InputManager>();
+        if (cloneInput != null)
+        {
+            cloneInput.enabled = false;
+        }
+
         Camera playerCam = gameObject.GetComponentInChildren<Camera>();
         Camera cloneCam = clone.GetComponentInChildren<Camera>();
 

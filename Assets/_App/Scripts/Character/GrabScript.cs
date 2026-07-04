@@ -75,6 +75,75 @@ public class GrabScript : MonoBehaviour
     /// is held.</summary>
     public Transform HoldCam => m_HoldCam;
 
+    /// <summary>
+    /// Single-key grab action, evaluated from the ACTIVE body's point of view. There is one
+    /// shared grabber but either body can be the holder (tracked by <see cref="HoldCam"/>):
+    /// <list type="bullet">
+    /// <item>If the active body is the current holder, drop the item.</item>
+    /// <item>Otherwise (nothing held, or the OTHER body is holding), grab whatever the active
+    /// body is aiming at -- first releasing the other body's hold so the item transfers into
+    /// this body's hand. Aiming at nothing does nothing.</item>
+    /// </list>
+    /// Bind ONE key to this. A holder press returns immediately, so aiming at your own held
+    /// item can never re-grab it (the original drop-then-regrab bug); and a non-holder only
+    /// acts when aiming at a grabbable, so looking away never drops the other body's item --
+    /// but looking straight at it takes it.
+    /// </summary>
+    public void ToggleGrab()
+    {
+        Camera cam = Camera.main;
+
+        // The active body already holds the item -> this press just drops it.
+        if (m_HandOccupied && cam != null && m_HoldCam == cam.transform)
+        {
+            ReleaseObject();
+            return;
+        }
+
+        // The active body is not the holder. Only act when it is actually aiming at a
+        // grabbable: then take it, releasing any hold the OTHER body has first so the item
+        // moves into this body's hand instead of just being dropped where it was.
+        if (!TryFindGrabTarget(cam, out _, out _, out _))
+        {
+            return;
+        }
+        if (m_HandOccupied)
+        {
+            ReleaseObject();
+        }
+        PickUpObject();
+    }
+
+    // Raycast from the given camera and report the grabbable it hit, if any. A hit qualifies
+    // when it has a non-kinematic Rigidbody and is either on the Pickable layer or part of a
+    // Ragdoll corpse. Shared by PickUpObject and ToggleGrab so the "is there something to
+    // grab?" test and the actual grab always agree.
+    bool TryFindGrabTarget(Camera cam, out RaycastHit hit, out Rigidbody body, out bool isRagdoll)
+    {
+        hit = default;
+        body = null;
+        isRagdoll = false;
+        if (cam == null)
+        {
+            return false;
+        }
+
+        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
+        if (!Physics.Raycast(ray, out hit, m_pickUpDistance))
+        {
+            return false;
+        }
+
+        body = hit.collider.attachedRigidbody;
+        if (body == null || body.isKinematic)
+        {
+            return false;
+        }
+
+        isRagdoll = hit.collider.GetComponentInParent<Ragdoll>() != null;
+        return hit.collider.gameObject.layer == PickableLayer || isRagdoll;
+    }
+
     public void PickUpObject()
     {
         if (m_HandOccupied)
@@ -83,25 +152,7 @@ public class GrabScript : MonoBehaviour
         }
 
         Camera cam = Camera.main;
-        if (cam == null)
-        {
-            return;
-        }
-
-        Ray ray = new Ray(cam.transform.position, cam.transform.forward);
-        if (!Physics.Raycast(ray, out RaycastHit hit, m_pickUpDistance))
-        {
-            return;
-        }
-
-        Rigidbody body = hit.collider.attachedRigidbody;
-        if (body == null || body.isKinematic)
-        {
-            return;
-        }
-
-        bool isRagdoll = hit.collider.GetComponentInParent<Ragdoll>() != null;
-        if (hit.collider.gameObject.layer != PickableLayer && !isRagdoll)
+        if (!TryFindGrabTarget(cam, out RaycastHit hit, out Rigidbody body, out bool isRagdoll))
         {
             return;
         }

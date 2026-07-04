@@ -488,19 +488,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 8869766384893211448}
         m_TargetAssemblyTypeName: 
-        m_MethodName: ReleaseObject
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 8869766384893211448}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: PickUpObject
+        m_MethodName: ToggleGrab
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -520,18 +508,6 @@ MonoBehaviour:
   OnRDown:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8869766384893211448}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: ReleaseObject
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
       - m_Target: {fileID: 1633762508168300609}
         m_TargetAssemblyTypeName: 
         m_MethodName: DestroyClone
@@ -606,7 +582,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Retarget: 1
-  m_SwingScale: 0.7
+  m_SwingScale: 0.2
   m_Sway: 1
   m_BreathAmplitude: 0.004
   m_BreathSpeed: 1.4
@@ -1093,8 +1069,35 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 0d9e97718873a324d916a21481d93cde,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2963137331388374492}
   m_SourcePrefab: {fileID: 100100000, guid: 0d9e97718873a324d916a21481d93cde, type: 3}
+--- !u!1 &3824162338256891190 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 0d9e97718873a324d916a21481d93cde,
+    type: 3}
+  m_PrefabInstance: {fileID: 4166760612081668199}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2963137331388374492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3824162338256891190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8916593a7970af46b6d9a9f40c99779, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PositionWeight: 1
+  m_RotationWeight: 0
+  m_BlendSpeed: 8
+  m_UseRightHand: 1
+  m_ReachOffset: {x: 0, y: 0, z: 0}
 --- !u!4 &4492894568446621580 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 0d9e97718873a324d916a21481d93cde,

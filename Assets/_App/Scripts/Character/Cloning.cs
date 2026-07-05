@@ -166,6 +166,10 @@ public class Cloning : MonoBehaviour
         if (cloneCam != null)
         {
             cloneCam.tag = "Untagged";
+            // The single grabber (on the player) may be holding a card in the clone's slot.
+            // Drop it now so the card doesn't hang in mid-air while the clone's camera (and its
+            // HoldPoint) is torn down. The FixedUpdate HoldCam==null branch is the safety net.
+            gameObject.GetComponent<GrabScript>()?.ReleaseForCamera(cloneCam.transform);
         }
 
         // Animate the split closing, then leave the clone behind as a ragdoll.

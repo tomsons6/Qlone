@@ -13,8 +13,8 @@ using UnityEngine;
 /// Must live on the same GameObject as the humanoid <see cref="Animator"/>
 /// (<c>FirstCharacter</c>), because <c>OnAnimatorIK</c> is only dispatched there, and the
 /// animator controller's layer needs "IK Pass" enabled. It resolves the single grabber by
-/// tag "Main" and reaches only while that grabber's <see cref="GrabScript.HoldCam"/> is
-/// this body's camera -- the same holder gating <see cref="GrabIK"/> uses -- so the reach
+/// tag "Main" and reaches only while <see cref="GrabScript.IsHolding"/> reports this body's
+/// camera as a holder -- the same holder gating <see cref="GrabIK"/> uses -- so the reach
 /// stays with the holder across control switches and the idle body keeps its normal pose.
 /// A dismissed corpse has its Animator disabled, so <c>OnAnimatorIK</c> stops firing and
 /// no reach is applied to ragdolls.
@@ -44,8 +44,8 @@ public class BodyGrabIK : MonoBehaviour
         m_Animator = GetComponent<Animator>();
     }
 
-    // The body's own camera lives under the body root (this model's parent). Comparing it to
-    // the grabber's HoldCam tells us whether THIS body is the one carrying the object.
+    // The body's own camera lives under the body root (this model's parent). Asking the grabber
+    // whether it holds anything for this camera tells us whether THIS body is carrying the object.
     bool Resolve()
     {
         Transform bodyRoot = transform.parent != null ? transform.parent : transform;
@@ -68,8 +68,7 @@ public class BodyGrabIK : MonoBehaviour
             }
         }
         return m_HoldSource != null
-            && m_HoldSource.HandOccupied
-            && m_HoldSource.HoldCam == m_Cam.transform;
+            && m_HoldSource.IsHolding(m_Cam.transform);
     }
 
     void OnAnimatorIK(int layerIndex)
@@ -97,7 +96,7 @@ public class BodyGrabIK : MonoBehaviour
             return;
         }
 
-        Vector3 targetPos = m_HoldSource.GrabWorldPosition;
+        Vector3 targetPos = m_HoldSource.GetGrabWorldPosition(m_Cam.transform);
         if (m_ReachOffset != Vector3.zero)
         {
             targetPos += m_Cam.transform.TransformVector(m_ReachOffset);

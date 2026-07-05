@@ -276,6 +276,7 @@ GameObject:
   - component: {fileID: 8885890575190647874}
   - component: {fileID: 187343416492905513}
   - component: {fileID: 2791549596781681036}
+  - component: {fileID: 2418805367836386765}
   m_Layer: 10
   m_Name: MainCharecter
   m_TagString: Main
@@ -425,7 +426,6 @@ MonoBehaviour:
   maxHoldSpeed: 25
   matchRotation: 1
   rotationSpeed: 12
-  playerLayer: 10
 --- !u!114 &3318155820991206887
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -526,6 +526,28 @@ MonoBehaviour:
   OnRHold:
     m_PersistentCalls:
       m_Calls: []
+  KeyboardButtonInteract: 103
+  OnInteractDown:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2418805367836386765}
+        m_TargetAssemblyTypeName:
+        m_MethodName: Interact
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument:
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnInteractUp:
+    m_PersistentCalls:
+      m_Calls: []
+  OnInteractHold:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &8885890575190647874
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -591,6 +613,19 @@ MonoBehaviour:
   m_BobFullSpeed: 3
   m_LookSwayAngle: 3
   m_LookSwaySmooth: 10
+--- !u!114 &2418805367836386765
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1621053682611726409}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcbd141b0c7dd174684be2e878812063, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Distance: 3
 --- !u!1 &4897890778811267941
 GameObject:
   m_ObjectHideFlags: 0

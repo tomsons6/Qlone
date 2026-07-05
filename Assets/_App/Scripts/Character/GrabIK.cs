@@ -227,7 +227,7 @@ public class GrabIK : MonoBehaviour
     // would read as an instant false contact and stop the fingers dead).
     Collider ContactCollider()
     {
-        Collider c = m_HoldSource != null ? m_HoldSource.HeldCollider : null;
+        Collider c = m_HoldSource != null ? m_HoldSource.GetHeldCollider(m_Cam.transform) : null;
         if (c == null || !c.enabled)
         {
             return null;
@@ -297,18 +297,17 @@ public class GrabIK : MonoBehaviour
             }
         }
         return m_HoldSource != null
-            && m_HoldSource.HandOccupied
-            && m_HoldSource.HoldCam == m_Cam.transform;
+            && m_HoldSource.IsHolding(m_Cam.transform);
     }
 
     Vector3 ComputeTargetPosition()
     {
         // Prefer the actual grab point on the held body so the hand visibly reaches
         // out to meet the object and follows it in; fall back to the hold anchor.
-        if (m_ReachHeldObject && m_HoldSource != null && m_HoldSource.HandOccupied)
+        if (m_ReachHeldObject && m_HoldSource != null && m_HoldSource.IsHolding(m_Cam.transform))
         {
             Vector3 offset = m_HoldPoint != null ? m_HoldPoint.TransformVector(m_PalmOffset) : m_PalmOffset;
-            return m_HoldSource.GrabWorldPosition + offset;
+            return m_HoldSource.GetGrabWorldPosition(m_Cam.transform) + offset;
         }
         if (m_HoldPoint != null)
         {

@@ -12,9 +12,24 @@ using UnityEngine;
 /// </summary>
 public class KeyCardScanner : DoorCondition
 {
-    [Tooltip("Tag a Rigidbody must have to count as an accepted card. Empty accepts any held Rigidbody.")]
     [SerializeField]
     string m_AcceptedTag = "KeyCard";
+
+    [SerializeField]
+    private Renderer ledRenderer;
+    [SerializeField]
+    private int ledMaterialIndex = 0;
+
+    // Property IDs for the LED colors we drive at runtime.
+    static readonly int k_BaseColor = Shader.PropertyToID("_BaseColor");
+    static readonly int k_Color = Shader.PropertyToID("_Color");
+    static readonly int k_EmissionColor = Shader.PropertyToID("_EmissionColor");
+
+    // Per-renderer material instance for the LED slot. Resolved lazily so recoloring this scanner
+    // affects only its own LED -- not the shared .mat asset and not the other scanners.
+    // (A MaterialPropertyBlock does NOT work here: the URP SRP Batcher ignores per-renderer overrides
+    // of _BaseColor/_EmissionColor because they live in the UnityPerMaterial constant buffer.)
+    Material m_LedInstance;
 
     // Cards inside the trigger, tracked by Rigidbody so a card's multiple colliders dedupe to a
     // single occupant and a card that is dragged each FixedUpdate keeps counting as inside.
@@ -69,6 +84,33 @@ public class KeyCardScanner : DoorCondition
                 }
             }
         }
+        ToggleLed(held);
         SetMet(held);
+    }
+
+    private void ToggleLed(bool toggle)
+    {
+        if (ledRenderer == null)
+        {
+            return;
+        }
+
+        if (m_LedInstance == null)
+        {
+            // renderer.materials returns per-renderer INSTANCES (and assigns them back to this
+            // renderer), so from here on we edit only this scanner's copy of the LED material.
+            Material[] mats = ledRenderer.materials;
+            if (ledMaterialIndex < 0 || ledMaterialIndex >= mats.Length)
+            {
+                return;
+            }
+            m_LedInstance = mats[ledMaterialIndex];
+            m_LedInstance.EnableKeyword("_EMISSION"); // make sure the emission pass is active
+        }
+
+        Color color = toggle ? Color.green : Color.red;
+        m_LedInstance.SetColor(k_BaseColor, color);   // URP Lit
+        m_LedInstance.SetColor(k_Color, color);       // Built-in / Standard fallback
+        m_LedInstance.SetColor(k_EmissionColor, color);
     }
 }

@@ -526,7 +526,7 @@ MonoBehaviour:
   OnRHold:
     m_PersistentCalls:
       m_Calls: []
-  KeyboardButtonInteract: 103
+  KeyboardButtonInteract: 101
   OnInteractDown:
     m_PersistentCalls:
       m_Calls:

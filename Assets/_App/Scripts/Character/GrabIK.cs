@@ -66,6 +66,28 @@ public class GrabIK : MonoBehaviour
     /// reads this to fade the retargeted right-arm swing out while the grip pose is active.
     /// </summary>
     public float GripWeight => m_Weight;
+
+    // An externally pushed reach point (e.g. a CloneButton cap this body is holding down),
+    // used instead of the held object. It takes priority over a hold, so a body carrying
+    // something still reaches out to press.
+    bool m_HasReach;
+    Vector3 m_ReachTarget;
+
+    /// <summary>Reach the hand to an arbitrary world point instead of a held object, and keep
+    /// it there until <see cref="ClearReachTarget"/>. Call it again to move the point.</summary>
+    public void SetReachTarget(Vector3 worldPos)
+    {
+        m_HasReach = true;
+        m_ReachTarget = worldPos;
+    }
+
+    /// <summary>Stop reaching an external point; the arm blends back to rest (or to the held
+    /// object, if this body is carrying one).</summary>
+    public void ClearReachTarget()
+    {
+        m_HasReach = false;
+    }
+
     bool m_Resolved;
     bool m_Posed;            // are we currently overriding the bones?
     float m_Weight;
@@ -124,7 +146,18 @@ public class GrabIK : MonoBehaviour
         }
 
         PoseArm(m_LastTargetPos);
-        PoseFingers();
+
+        // Pressing a button is a flat-palm reach, not a grip: with no held collider to stop them
+        // the contact solver would curl every phalanx to the full angle (a fist) against the
+        // button face, so hold the fingers at their imported rest pose while reaching.
+        if (m_HasReach)
+        {
+            RestFingers();
+        }
+        else
+        {
+            PoseFingers();
+        }
     }
 
     void PoseArm(Vector3 targetPos)
@@ -267,6 +300,13 @@ public class GrabIK : MonoBehaviour
         m_UpperArm.localRotation = m_UpperRest;
         m_ForeArm.localRotation = m_ForeRest;
         m_Hand.localRotation = m_HandRest;
+        RestFingers();
+        m_HasSolve = false; // the grip fully released; recompute fresh on the next grab
+    }
+
+    // Put every phalanx back on its imported rest rotation, leaving the arm alone.
+    void RestFingers()
+    {
         for (int f = 0; f < m_Fingers.Count; f++)
         {
             Finger finger = m_Fingers[f];
@@ -275,7 +315,6 @@ public class GrabIK : MonoBehaviour
                 finger.Bones[i].localRotation = finger.Rest[i];
             }
         }
-        m_HasSolve = false; // the grip fully released; recompute fresh on the next grab
     }
 
     // Grip only when THIS body is the one holding something -- i.e. the grab was made with
@@ -287,6 +326,12 @@ public class GrabIK : MonoBehaviour
         if (m_Cam == null)
         {
             return false;
+        }
+        // An external reach (a button this body is holding down) poses the arm on its own,
+        // independently of whether anything is held.
+        if (m_HasReach)
+        {
+            return true;
         }
         if (m_HoldSource == null)
         {
@@ -302,6 +347,11 @@ public class GrabIK : MonoBehaviour
 
     Vector3 ComputeTargetPosition()
     {
+        // An explicit reach point wins over everything else.
+        if (m_HasReach)
+        {
+            return m_ReachTarget;
+        }
         // Prefer the actual grab point on the held body so the hand visibly reaches
         // out to meet the object and follows it in; fall back to the hold anchor.
         if (m_ReachHeldObject && m_HoldSource != null && m_HoldSource.IsHolding(m_Cam.transform))

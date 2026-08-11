@@ -38,6 +38,29 @@ public class BodyGrabIK : MonoBehaviour
     GrabScript m_HoldSource; // the single grabber that actually holds things (player root, tag "Main")
     float m_Weight;          // current eased reach weight
     bool m_Resolved;
+    Vector3 m_LastTargetPos; // last reach target, held through the blend-out
+    bool m_HasTarget;        // has m_LastTargetPos ever been set?
+
+    // An externally pushed reach point (e.g. a CloneButton cap this body is holding down),
+    // used instead of the held object and taking priority over it.
+    bool m_HasReach;
+    Vector3 m_ReachTarget;
+
+    /// <summary>Reach the hand to an arbitrary world point instead of a held object, and keep it
+    /// there until <see cref="ClearReachTarget"/>. The world point is used as-is (the camera-space
+    /// nudge is skipped), so the caller supplies the exact spot the palm should land on.</summary>
+    public void SetReachTarget(Vector3 worldPos)
+    {
+        m_HasReach = true;
+        m_ReachTarget = worldPos;
+    }
+
+    /// <summary>Stop reaching an external point; the arm eases back to its normal pose (or to a
+    /// held object, if this body is carrying one).</summary>
+    public void ClearReachTarget()
+    {
+        m_HasReach = false;
+    }
 
     void Awake()
     {
@@ -84,8 +107,10 @@ public class BodyGrabIK : MonoBehaviour
 
         AvatarIKGoal goal = m_UseRightHand ? AvatarIKGoal.RightHand : AvatarIKGoal.LeftHand;
 
-        // Ease the reach in while holding and out when not, so the arm never snaps.
-        bool reach = m_Resolved && IsHolder();
+        // Ease the reach in while holding (or while an external point is pushed in) and out when
+        // not, so the arm never snaps.
+        bool holding = m_Resolved && IsHolder();
+        bool reach = m_HasReach || holding;
         float target = reach ? m_PositionWeight : 0f;
         m_Weight = Mathf.MoveTowards(m_Weight, target, m_BlendSpeed * Time.deltaTime);
 
@@ -96,11 +121,31 @@ public class BodyGrabIK : MonoBehaviour
             return;
         }
 
-        Vector3 targetPos = m_HoldSource.GetGrabWorldPosition(m_Cam.transform);
-        if (m_ReachOffset != Vector3.zero)
+        // Track the live target while reaching and hold the last one through the blend-out, so the
+        // arm retracts from where it was instead of snapping to a stale hold position (mirrors
+        // GrabIK.m_LastTargetPos). The null re-check matters now that m_HasReach can raise the
+        // weight without IsHolder() having proved the grabber and camera are there.
+        if (m_HasReach)
         {
-            targetPos += m_Cam.transform.TransformVector(m_ReachOffset);
+            m_LastTargetPos = m_ReachTarget;
         }
+        else if (holding && m_HoldSource != null && m_Cam != null)
+        {
+            m_LastTargetPos = m_HoldSource.GetGrabWorldPosition(m_Cam.transform);
+            if (m_ReachOffset != Vector3.zero)
+            {
+                m_LastTargetPos += m_Cam.transform.TransformVector(m_ReachOffset);
+            }
+        }
+        else if (!m_HasTarget)
+        {
+            // Blending down but nothing was ever aimed at -- nothing sensible to reach.
+            m_Animator.SetIKPositionWeight(goal, 0f);
+            m_Animator.SetIKRotationWeight(goal, 0f);
+            return;
+        }
+        m_HasTarget = true;
+        Vector3 targetPos = m_LastTargetPos;
 
         m_Animator.SetIKPositionWeight(goal, m_Weight);
         m_Animator.SetIKPosition(goal, targetPos);

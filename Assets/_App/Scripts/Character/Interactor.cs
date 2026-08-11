@@ -1,9 +1,9 @@
 using UnityEngine;
 
 /// <summary>
-/// Player-owned interact actor. Bound to the interact key (default G) through the player's
+/// Player-owned interact actor. Bound to the interact key through the player's
 /// <see cref="InputManager"/>, it raycasts from the active camera (Camera.main, which follows
-/// whichever body is in control) and, if it hits an <see cref="InteractButton"/>, presses it.
+/// whichever body is in control) and, if it hits an <see cref="IInteractable"/>, presses it.
 ///
 /// Like <see cref="GrabScript"/>, there is a single actor on the player root (tag "Main") that
 /// acts on behalf of the active body. The clone inherits this component, but its InputManager
@@ -16,7 +16,7 @@ public class Interactor : MonoBehaviour
     [SerializeField]
     float m_Distance = 3f;
 
-    /// <summary>Raycast from the active camera and press the first <see cref="InteractButton"/>
+    /// <summary>Raycast from the active camera and press the first <see cref="IInteractable"/>
     /// found on the hit collider or its parents. Wire this to the interact key's OnInteractDown
     /// event on the player's <see cref="InputManager"/>.</summary>
     public void Interact()
@@ -35,10 +35,10 @@ public class Interactor : MonoBehaviour
             return;
         }
 
-        InteractButton button = hit.collider.GetComponentInParent<InteractButton>();
-        if (button != null)
+        IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
+        if (interactable != null)
         {
-            button.Interact();
+            interactable.Interact();
         }
     }
 }

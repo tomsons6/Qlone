@@ -16,7 +16,7 @@ using UnityEngine.Events;
 /// Combine a momentary button with <see cref="DoorLock"/>'s latch to open a door for good on a
 /// single press.
 /// </summary>
-public class InteractButton : DoorCondition
+public class InteractButton : DoorCondition, IInteractable
 {
     [Tooltip("Latching = a switch (each press toggles). Off = a momentary button (each press pulses).")]
     [SerializeField]

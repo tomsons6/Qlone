@@ -67,18 +67,24 @@ public class GrabIK : MonoBehaviour
     /// </summary>
     public float GripWeight => m_Weight;
 
-    // An externally pushed reach point (e.g. a CloneButton cap this body is holding down),
-    // used instead of the held object. It takes priority over a hold, so a body carrying
-    // something still reaches out to press.
+    // An externally pushed reach point (e.g. a CloneButton cap this body is holding down, or a
+    // Lever handle it is gripping), used instead of the held object. It takes priority over a
+    // hold, so a body carrying something still reaches out to press.
     bool m_HasReach;
     Vector3 m_ReachTarget;
+    Collider m_ReachCollider;
 
     /// <summary>Reach the hand to an arbitrary world point instead of a held object, and keep
-    /// it there until <see cref="ClearReachTarget"/>. Call it again to move the point.</summary>
-    public void SetReachTarget(Vector3 worldPos)
+    /// it there until <see cref="ClearReachTarget"/>. Call it again to move the point.
+    ///
+    /// Pass <paramref name="gripCollider"/> to have the fingers curl around that shape (a lever
+    /// handle) the way they wrap a held object; leave it null for a flat-palm reach (a button).
+    /// </summary>
+    public void SetReachTarget(Vector3 worldPos, Collider gripCollider = null)
     {
         m_HasReach = true;
         m_ReachTarget = worldPos;
+        m_ReachCollider = gripCollider;
     }
 
     /// <summary>Stop reaching an external point; the arm blends back to rest (or to the held
@@ -86,6 +92,7 @@ public class GrabIK : MonoBehaviour
     public void ClearReachTarget()
     {
         m_HasReach = false;
+        m_ReachCollider = null;
     }
 
     bool m_Resolved;
@@ -147,10 +154,11 @@ public class GrabIK : MonoBehaviour
 
         PoseArm(m_LastTargetPos);
 
-        // Pressing a button is a flat-palm reach, not a grip: with no held collider to stop them
-        // the contact solver would curl every phalanx to the full angle (a fist) against the
-        // button face, so hold the fingers at their imported rest pose while reaching.
-        if (m_HasReach)
+        // Pressing a button is a flat-palm reach, not a grip: with no collider to stop them the
+        // contact solver would curl every phalanx to the full angle (a fist) against the button
+        // face, so hold the fingers at their imported rest pose. A reach that DID name a collider
+        // (a lever handle) is a real grip, so let the fingers wrap it as they would a held object.
+        if (m_HasReach && m_ReachCollider == null)
         {
             RestFingers();
         }
@@ -254,13 +262,16 @@ public class GrabIK : MonoBehaviour
         }
     }
 
-    // The object the fingers should wrap: the held body's collider, but only when it's a shape
-    // Collider.ClosestPoint supports. Otherwise null -> fall back to the fixed max curl rather
-    // than misreading contact (ClosestPoint returns the input point for a non-convex mesh, which
-    // would read as an instant false contact and stop the fingers dead).
+    // The object the fingers should wrap: the gripped reach collider while reaching, otherwise the
+    // held body's collider -- but only when it's a shape Collider.ClosestPoint supports. Otherwise
+    // null -> fall back to the fixed max curl rather than misreading contact (ClosestPoint returns
+    // the input point for a non-convex mesh, which would read as an instant false contact and stop
+    // the fingers dead).
     Collider ContactCollider()
     {
-        Collider c = m_HoldSource != null ? m_HoldSource.GetHeldCollider(m_Cam.transform) : null;
+        Collider c = m_HasReach
+            ? m_ReachCollider
+            : (m_HoldSource != null ? m_HoldSource.GetHeldCollider(m_Cam.transform) : null);
         if (c == null || !c.enabled)
         {
             return null;

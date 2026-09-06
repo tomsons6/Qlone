@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4793789113297303480}
   - component: {fileID: 7787670468295885625}
   - component: {fileID: 5174117220569187012}
+  - component: {fileID: 6626313340627804377}
   m_Layer: 0
   m_Name: Corner
   m_TagString: Untagged
@@ -113,3 +114,22 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -5221963080773851136, guid: 355fe45f0943f424d8939d7f579a7203, type: 3}
+--- !u!114 &6626313340627804377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4807831377096637592}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48f59d3dfa0603c4fbd98f0f5fff91ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Sockets:
+  - LocalPosition: {x: 0.010433197, y: -8.068291, z: 0.00000014901161}
+    LocalDirection: {x: 0, y: -1, z: 0}
+    Radius: 2.2649434
+  - LocalPosition: {x: 8.140635, y: -0.00074100494, z: 0.000000029802322}
+    LocalDirection: {x: 1, y: 5.778767e-11, z: -0}
+    Radius: 2.2649443

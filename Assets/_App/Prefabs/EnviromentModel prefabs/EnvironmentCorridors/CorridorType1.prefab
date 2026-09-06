@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5013664392120081499}
   - component: {fileID: 72698219735368375}
   - component: {fileID: 3366919444584159149}
+  - component: {fileID: 3058974023157031235}
   m_Layer: 0
   m_Name: CorridorType1
   m_TagString: Untagged
@@ -113,3 +114,22 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -4183953552837460419, guid: 355fe45f0943f424d8939d7f579a7203, type: 3}
+--- !u!114 &3058974023157031235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2329053987419456686}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48f59d3dfa0603c4fbd98f0f5fff91ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Sockets:
+  - LocalPosition: {x: 0.097240925, y: -7.227997, z: -0.012147665}
+    LocalDirection: {x: 0, y: -1, z: 0}
+    Radius: 2.2616386
+  - LocalPosition: {x: 0.09996176, y: 7.227993, z: 0.00283885}
+    LocalDirection: {x: 0.0000018289148, y: 1, z: 0}
+    Radius: 2.2649431

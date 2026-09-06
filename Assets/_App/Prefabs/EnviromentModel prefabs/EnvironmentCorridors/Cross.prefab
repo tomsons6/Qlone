@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4952414432921102844}
   - component: {fileID: 1001243705121132374}
   - component: {fileID: 4749301780441145670}
+  - component: {fileID: 2375511405531723247}
   m_Layer: 0
   m_Name: Cross
   m_TagString: Untagged
@@ -113,3 +114,28 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 2061150301263699924, guid: 355fe45f0943f424d8939d7f579a7203, type: 3}
+--- !u!114 &2375511405531723247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5695331750882147423}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 48f59d3dfa0603c4fbd98f0f5fff91ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Sockets:
+  - LocalPosition: {x: -0.11564827, y: 7.9997616, z: 0.00000035762787}
+    LocalDirection: {x: -1.410832e-14, y: 1, z: 0}
+    Radius: 2.264944
+  - LocalPosition: {x: 8.014538, y: 0.06778622, z: 0.00000023841858}
+    LocalDirection: {x: 1, y: -5.778767e-11, z: -0}
+    Radius: 2.2649443
+  - LocalPosition: {x: -0.115659714, y: -7.9997616, z: 0.00000035762787}
+    LocalDirection: {x: -1.4108318e-14, y: -1, z: -0}
+    Radius: 2.2649443
+  - LocalPosition: {x: -8.018185, y: 0.067790985, z: 0.00000035762787}
+    LocalDirection: {x: -1, y: 0, z: 0}
+    Radius: 2.2649434
